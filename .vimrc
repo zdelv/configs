@@ -30,6 +30,29 @@ Plugin 'airblade/vim-gitgutter'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
 
+" quick-Scope
+Plugin 'unblevable/quick-scope'
+
+" C++ Highlighting
+Plugin 'octol/vim-cpp-enhanced-highlight'
+
+" Denite.vim
+Plugin 'Shougo/denite.nvim'
+
+" " fzf
+" set rtp+=/usr/local/opt/fzf
+" Plugin 'junegunn/fzf.vim'
+
+" CtrlSpace
+" Plugin 'vim-ctrlspace/vim-ctrlspace'
+
+" Commentary.vim
+Plugin 'tpope/vim-commentary'
+
+" ALE (Linting)
+Plugin 'w0rp/ale'
+
+
 " plugin from http://vim-scripts.org/vim/scripts.html
 
 " All of your Plugins must be added before the following line
@@ -61,3 +84,24 @@ endif
 if (has("termguicolors"))
 	set termguicolors
 endif
+
+" function! s:fzf_statusline()
+"   " Override statusline as you like
+"   highlight fzf1 ctermfg=161 ctermbg=251
+"   highlight fzf2 ctermfg=23 ctermbg=251
+"   highlight fzf3 ctermfg=237 ctermbg=251
+"   setlocal statusline=%#fzf1#\ >\ %#fzf2#fz%#fzf3#f
+" endfunction
+
+" autocmd! User FzfStatusLine call <SID>fzf_statusline()
+
+" CtrlSpace settings
+set nocompatible
+set hidden
+
+" ALE Settings
+let g:ale_fixers = {
+\   'cpp' : ['remove_trailing_lines','trim_whitespace','clang-format'],
+\   'sh'  : ['remove_trailing_lines','trim_whitespace','shfmt'],
+\}
+let g:airline#extensions#ale#enabled = 1
