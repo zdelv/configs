@@ -70,11 +70,22 @@ filetype plugin indent on    " required
 " see :h vundle for more details or wiki for FAQ
 " Put your non-Plugin stuff after this line
 
-
+" Background Color settings
 syntax enable
 set background=dark
 colorscheme gruvbox
-set number
+
+" Make line numbers swap
+" This makes Normal mode and Visual mode use hybrid but Insert use
+" non-relative numbering.
+:set number relativenumber
+
+:augroup numbertoggle
+:  autocmd!
+:  autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
+:  autocmd BufLeave,FocusLost,InsertEnter   * set norelativenumber
+:augroup END
+
 
 if (has("nvim"))
 	"For Neovim 0.1.3 and 0.1.4 < https://github.com/neovim/neovim/pull/2198 >
@@ -105,3 +116,10 @@ let g:ale_fixers = {
 \   'sh'  : ['remove_trailing_lines','trim_whitespace','shfmt'],
 \}
 let g:airline#extensions#ale#enabled = 1
+
+noremap <Up>    <Nop>
+noremap <Down>  <Nop>
+noremap <Left>  <Nop>
+noremap <Right> <Nop>
+
+"imap <C-m> <C-n><C-p>
