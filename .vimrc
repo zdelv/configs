@@ -10,9 +10,7 @@ call vundle#begin()
 " let Vundle manage Vundle, required
 Plugin 'VundleVim/Vundle.vim'
 
-" The following are examples of different formats supported.
-" Keep Plugin commands between vundle#begin/end.
-" plugin on GitHub repo
+" Vim-Fugitive
 Plugin 'tpope/vim-fugitive'
 
 " Color Schemes
@@ -27,8 +25,8 @@ Plugin 'scrooloose/nerdtree'
 Plugin 'airblade/vim-gitgutter'
 
 " Vim Airline
-Plugin 'vim-airline/vim-airline'
-Plugin 'vim-airline/vim-airline-themes'
+"Plugin 'vim-airline/vim-airline'
+"Plugin 'vim-airline/vim-airline-themes'
 
 " quick-Scope
 Plugin 'unblevable/quick-scope'
@@ -39,12 +37,8 @@ Plugin 'octol/vim-cpp-enhanced-highlight'
 " Denite.vim
 Plugin 'Shougo/denite.nvim'
 
-" " fzf
-" set rtp+=/usr/local/opt/fzf
-" Plugin 'junegunn/fzf.vim'
-
 " CtrlSpace
-" Plugin 'vim-ctrlspace/vim-ctrlspace'
+Plugin 'vim-ctrlspace/vim-ctrlspace'
 
 " Commentary.vim
 Plugin 'tpope/vim-commentary'
@@ -52,28 +46,22 @@ Plugin 'tpope/vim-commentary'
 " ALE (Linting)
 Plugin 'w0rp/ale'
 
-
-" plugin from http://vim-scripts.org/vim/scripts.html
+" CtrlP
+Plugin 'ctrlpvim/ctrlp.vim'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
 " To ignore plugin indent changes, instead use:
 "filetype plugin on
-"
-" Brief help
-" :PluginList       - lists configured plugins
-" :PluginInstall    - installs plugins; append `!` to update or just :PluginUpdate
-" :PluginSearch foo - searches for foo; append `!` to refresh local cache
-" :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal
-"
-" see :h vundle for more details or wiki for FAQ
-" Put your non-Plugin stuff after this line
+
+
+"Non-Plugin Stuff 
 
 " Background Color settings
 syntax enable
 set background=dark
-colorscheme gruvbox
+colorscheme yosemite
 
 " Make line numbers swap
 " This makes Normal mode and Visual mode use hybrid but Insert use
@@ -86,6 +74,7 @@ colorscheme gruvbox
 :  autocmd BufLeave,FocusLost,InsertEnter   * set norelativenumber
 :augroup END
 
+
 " 4 Space indenting
 filetype plugin indent on
 " show existing tab with 4 spaces width
@@ -96,6 +85,82 @@ set shiftwidth=4
 set expandtab
 
 
+" Shameles copy-paste from drumsetmonkey/.dotfiles
+" Status
+"---------------------------------
+set laststatus=2
+let g:currentmode={
+    \ 'n'  : 'normal ',
+    \ 'no' : 'n·operator pending ',
+    \ 'v'  : 'visual ',
+    \ 'V'  : 'v·line ',
+    \ 'Vb' : 'v·block ',
+    \ 's'  : 'select ',
+    \ 'S'  : 's·line ',
+    \ 'Sb' : 's·block ',
+    \ 'i'  : 'insert ',
+    \ 'R'  : 'replace ',
+    \ 'Rv' : 'v·replace ',
+    \ 'c'  : 'command ',
+    \ 'cv' : 'vim ex ',
+    \ 'ce' : 'ex ',
+    \ 'r'  : 'prompt ',
+    \ 'rm' : 'more ',
+    \ 'r?' : 'confirm ',
+    \ '!'  : 'shell ',
+    \ 't'  : 'terminal '}
+
+highlight PrimaryBlock ctermfg=007 guibg=#384779 guifg=fgcolor
+highlight SecondaryBlock ctermfg=008 guibg=#222B4A guifg=bgcolor
+highlight TeritaryBlock ctermfg=008 guibg=#13192D guifg=bgcolor
+
+" TODO Add new things for auto switching color on mode swap
+
+set statusline=
+set statusline+=%#PrimaryBlock#
+set statusline+=\ %{g:currentmode[mode()]}
+set statusline+=%#SecondaryBlock#
+set statusline+=%{StatuslineGit()}
+set statusline+=%#TeritaryBlock#
+set statusline+=\ %f\ 
+set statusline+=%M\ 
+set statusline+=%#TeritaryBlock#
+set statusline+=%=
+set statusline+=%#SecondaryBlock#
+set statusline+=\ %Y\ 
+set statusline+=%#PrimaryBlock#
+set statusline+=\ %P\ 
+
+function! GitBranch()
+	return system("git rev-parse --abbrev-ref HEAD 2>/dev/null | tr -d '\n'")
+endfunction
+
+function! StatuslineGit()
+	let l:branchname = GitBranch()
+	return strlen(l:branchname) > 0?'  '.l:branchname.' ':''
+endfunction<Paste>
+
+
+
+map <Up> <Nop>
+map <Down> <Nop>
+map <Left> <Nop>
+map <Right> <Nop>
+map <PageUp> <Nop>
+map <PageDown> <Nop>
+
+imap <Up> <Nop>
+imap <Down> <Nop>
+imap <Left> <Nop>
+imap <Right> <Nop>
+imap <PageUp> <Nop>
+imap <PageDown> <Nop>
+imap jk <Esc>
+
+
+
+" Some of this stuff isn't needed
+
 if (has("nvim"))
 	"For Neovim 0.1.3 and 0.1.4 < https://github.com/neovim/neovim/pull/2198 >
  let $NVIM_TUI_ENABLE_TRUE_COLOR=1
@@ -105,30 +170,13 @@ if (has("termguicolors"))
 	set termguicolors
 endif
 
-" function! s:fzf_statusline()
-"   " Override statusline as you like
-"   highlight fzf1 ctermfg=161 ctermbg=251
-"   highlight fzf2 ctermfg=23 ctermbg=251
-"   highlight fzf3 ctermfg=237 ctermbg=251
-"   setlocal statusline=%#fzf1#\ >\ %#fzf2#fz%#fzf3#f
-" endfunction
-
-" autocmd! User FzfStatusLine call <SID>fzf_statusline()
-
 " CtrlSpace settings
-set nocompatible
-set hidden
+"set nocompatible
+"set hidden
 
 " ALE Settings
+" CPP and SH
 let g:ale_fixers = {
 \   'cpp' : ['remove_trailing_lines','trim_whitespace','clang-format'],
 \   'sh'  : ['remove_trailing_lines','trim_whitespace','shfmt'],
 \}
-let g:airline#extensions#ale#enabled = 1
-
-noremap <Up>    <Nop>
-noremap <Down>  <Nop>
-noremap <Left>  <Nop>
-noremap <Right> <Nop>
-
-"imap <C-m> <C-n><C-p>
