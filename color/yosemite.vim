@@ -24,8 +24,8 @@ let s:bg3="#4c4c4c"
 let s:bg4="#5d5d5d"
 let s:keyword="#90D4EE"
 let s:builtin="#8d99d6"
-let s:const= "#5457ec"
-let s:comment="#a694ac"
+let s:const="#5457ec"
+let s:comment="#7A7795"
 let s:func="#6086cd"
 let s:str="#ea78c8"
 let s:type="#be6bd3"
@@ -52,7 +52,6 @@ exe 'hi Folded guifg='s:fg4' guibg='s:bg
 exe 'hi SignColumn guibg=NONE'
 exe 'hi Todo gui=bold guibg=NONE guifg='s:keyword
 
-
 exe 'hi Boolean guifg='s:const  
 exe 'hi Character guifg='s:const  
 exe 'hi Comment guifg='s:comment  
@@ -63,7 +62,7 @@ exe 'hi DiffAdd guifg=#f8f8f8 guibg=#46830c gui=bold'
 exe 'hi DiffDelete guifg=#ff0000'  
 exe 'hi DiffChange guifg='s:fg' guibg='s:var 
 exe 'hi DiffText guifg='s:fg' guibg='s:builtin' gui=bold'
-exe 'hi ErrorMsg guifg='s:warning' guibg='s:bg2' gui=bold'
+exe 'hi ErrorMsg guifg='s:warning2' guibg=NONE gui=bold'
 exe 'hi WarningMsg guifg='s:fg' guibg='s:warning2 
 exe 'hi Float guifg='s:const  
 exe 'hi Function guifg='s:func  
@@ -84,6 +83,7 @@ exe 'hi Title guifg='s:fg'  gui=bold'
 exe 'hi Type guifg='s:type 
 exe 'hi Underlined   gui=underline'
 exe 'hi EndOfBuffer guibg=NONE'
+exe 'hi Error guibg='s:warning2
 
 " Ruby Highlighting
 exe 'hi rubyAttribute guifg='s:builtin
@@ -116,4 +116,20 @@ exe 'hi htmlSpecialTagName guifg='s:keyword
 " Markdown Highlighting
 exe 'hi mkdCode guifg='s:builtin
 
+" StatusBar coloring
+exe 'hi PrimaryBlock guibg=#384779 guifg='s:fg
+" hi PrimaryBlock ctermfg=007 guibg=#384779 guifg=fgcolor
+hi SecondaryBlock ctermfg=008 guibg=#222B4A guifg=bgcolor
+hi TeritaryBlock ctermfg=008 guibg=#13192D guifg=bgcolor
 
+" Plugin Stuff Below
+
+" GitGutter
+hi! link GitGutterAdd CursorLineNr
+hi! link GitGutterDelete Statement
+exe 'hi GitGutterChange guifg='s:fg
+
+" CtrlSpace Coloring
+hi CtrlSpaceNormal guibg=NONE
+hi CtrlSpaceSelected guibg=NONE gui=bold
+hi! link CtrlSpaceStatus SecondaryBlock
