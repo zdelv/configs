@@ -1,6 +1,8 @@
 set nocompatible              " be iMproved, required
 filetype off                  " required
 
+let mapleader = ","
+
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
@@ -46,8 +48,11 @@ Plugin 'tpope/vim-commentary'
 " ALE (Linting)
 Plugin 'w0rp/ale'
 
-" CtrlP
-Plugin 'ctrlpvim/ctrlp.vim'
+" Goyo
+Plugin 'junegunn/goyo.vim'
+
+" vim-workspace
+Plugin 'thaerkh/vim-workspace'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -57,11 +62,8 @@ filetype plugin indent on    " required
 
 
 "Non-Plugin Stuff 
+"or Plugin settings
 
-" Background Color settings
-syntax enable
-set background=dark
-colorscheme yosemite
 
 " Make line numbers swap
 " This makes Normal mode and Visual mode use hybrid but Insert use
@@ -77,9 +79,7 @@ colorscheme yosemite
 
 " 4 Space indenting
 filetype plugin indent on
-" show existing tab with 4 spaces width
-set tabstop=4
-" " when indenting with '>', use 4 spaces width
+" show existing tab with 4 spaces width set tabstop=4 " when indenting with '>', use 4 spaces width
 set shiftwidth=4
 " " On pressing tab, insert 4 spaces
 set expandtab
@@ -94,10 +94,10 @@ let g:currentmode={
     \ 'no' : 'n·operator pending ',
     \ 'v'  : 'visual ',
     \ 'V'  : 'v·line ',
-    \ 'Vb' : 'v·block ',
+    \ '^V' : 'v·block ',
     \ 's'  : 'select ',
     \ 'S'  : 's·line ',
-    \ 'Sb' : 's·block ',
+    \ '^S' : 's·block ',
     \ 'i'  : 'insert ',
     \ 'R'  : 'replace ',
     \ 'Rv' : 'v·replace ',
@@ -109,10 +109,6 @@ let g:currentmode={
     \ 'r?' : 'confirm ',
     \ '!'  : 'shell ',
     \ 't'  : 'terminal '}
-
-highlight PrimaryBlock ctermfg=007 guibg=#384779 guifg=fgcolor
-highlight SecondaryBlock ctermfg=008 guibg=#222B4A guifg=bgcolor
-highlight TeritaryBlock ctermfg=008 guibg=#13192D guifg=bgcolor
 
 " TODO Add new things for auto switching color on mode swap
 
@@ -140,7 +136,8 @@ function! StatuslineGit()
 	return strlen(l:branchname) > 0?'  '.l:branchname.' ':''
 endfunction<Paste>
 
-
+" Remove --Insert-- and other mode signifiers
+set noshowmode
 
 map <Up> <Nop>
 map <Down> <Nop>
@@ -158,6 +155,59 @@ imap <PageDown> <Nop>
 imap jk <Esc>
 
 
+" Background Color settings
+syntax enable
+set background=dark
+colorscheme yosemite
+
+" denite
+
+if has('nvim')
+  " reset 50% winheight on window resize
+  augroup deniteresize
+    autocmd!
+    autocmd VimResized,VimEnter * call denite#custom#option('default',
+          \'winheight', winheight(0) / 2)
+  augroup end
+
+  call denite#custom#option('default', {
+        \ 'prompt': '❯'
+        \ })
+
+  call denite#custom#var('file_rec', 'command',
+        \ ['rg', '--files', '--glob', '!.git', ''])
+  call denite#custom#var('grep', 'command', ['rg'])
+  call denite#custom#var('grep', 'default_opts',
+        \ ['--hidden', '--vimgrep', '--no-heading', '-S'])
+  call denite#custom#var('grep', 'recursive_opts', [])
+  call denite#custom#var('grep', 'pattern_opt', ['--regexp'])
+  call denite#custom#var('grep', 'separator', ['--'])
+  call denite#custom#var('grep', 'final_opts', [])
+  call denite#custom#map('insert', '<Esc>', '<denite:enter_mode:normal>',
+        \'noremap')
+  call denite#custom#map('insert', 'jk', '<denite:enter_mode:normal>',
+        \'noremap')
+  call denite#custom#map('normal', '<Esc>', '<NOP>',
+        \'noremap')
+  call denite#custom#map('insert', '<C-v>', '<denite:do_action:vsplit>',
+        \'noremap')
+  call denite#custom#map('normal', '<C-v>', '<denite:do_action:vsplit>',
+        \'noremap')
+  call denite#custom#map('normal', 'dw', '<denite:delete_word_after_caret>',
+        \'noremap')
+endif
+
+nnoremap <C-p> :<C-u>Denite file_rec<CR>
+nnoremap <leader>s :<C-u>Denite buffer<CR>
+nnoremap <leader><Space>s :<C-u>DeniteBufferDir buffer<CR>
+nnoremap <leader>8 :<C-u>DeniteCursorWord grep:. -mode=normal<CR>
+nnoremap <leader>/ :<C-u>Denite grep:. -mode=normal<CR>
+nnoremap <leader><Space>/ :<C-u>DeniteBufferDir grep:. -mode=normal<CR>
+nnoremap <leader>d :<C-u>DeniteBufferDir file_rec<CR>
+
+hi link deniteMatchedChar Special
+hi WildMenu guifg=white guibg=NONE gui=bold
+
 
 " Some of this stuff isn't needed
 
@@ -171,8 +221,19 @@ if (has("termguicolors"))
 endif
 
 " CtrlSpace settings
-"set nocompatible
-"set hidden
+set nocompatible
+set hidden
+
+map <C-Space> :CtrlSpace<CR>
+
+let g:CtrlSpaceUnicode = 0
+let g:ctrlspace_unicode_font = 0
+
+"let g:CtrlSpaceSymbols = {"CS": "#", "All": "ALL"} 
+
+" vim-workspace
+
+
 
 " ALE Settings
 " CPP and SH
