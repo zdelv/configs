@@ -30,6 +30,9 @@ Plugin 'airblade/vim-gitgutter'
 "Plugin 'vim-airline/vim-airline'
 "Plugin 'vim-airline/vim-airline-themes'
 
+" Delimitmate
+Plugin 'raimondi/delimitmate'
+
 " quick-Scope
 Plugin 'unblevable/quick-scope'
 
@@ -154,6 +157,9 @@ imap <PageUp> <Nop>
 imap <PageDown> <Nop>
 imap jk <Esc>
 
+" Tab settings
+nnoremap <C-y> gt
+nnoremap <C-t> gT
 
 " Background Color settings
 syntax enable
