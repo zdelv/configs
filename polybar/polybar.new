@@ -9,7 +9,7 @@
 
 [colors]
 ;background = ${xrdb:color0:#222}
-background = #222
+background = #13193F 
 background-alt = #444
 ;foreground = ${xrdb:color7:#222}
 foreground = #dfdfdf
@@ -20,11 +20,11 @@ alert = #bd2c40
 
 [bar/test]
 monitor = ${env:MONITOR:}
-width = 100%
+;width = 94%
 height = 27
-;offset-x = 1%
+;offset-x = 3%
 ;offset-y = 1%
-radius = 6.0
+;radius = 6.0
 fixed-center = true 
 
 background = ${colors.background}
@@ -46,11 +46,11 @@ font-0 = boxxy
 font-1 = unifont:fontformat=truetype:size=8:antialias=false;0
 font-2 = siji:pixelsize=10;1
 
-modules-left = i3
-modules-center = xwindow music 
-modules-right = alsa memory cpu temperature date 
+modules-left = i3 xwindow
+modules-center = music 
+modules-right = vpn alsa memory cpu temperature date 
 
-tray-position = right
+;tray-position = center
 tray-padding = 2
 ;tray-transparent = true
 tray-background = #2b303b
@@ -70,13 +70,21 @@ tray-background = #2b303b
 cursor-click = pointer
 cursor-scroll = ns-resize
 
+[module/vpn]
+type = custom/script
+exec = /home/zdelv/etc/scripts/vpnstat.sh
+click-middle = ovpn
+click-left = ovpn
+click-right = ovpn
+
+
 [module/music]
 type = custom/script
-exec = ~/etc/scripts/player-mpris-tail.py
+exec = /home/zdelv/etc/scripts/player-mpris-tail.py
 tail = true
-click-left = ~/polybar-scripts/player-ctrl.sh previous
-click-right = ~/polybar-scripts/player-ctrl.sh next
-click-middle = ~/polybar-scripts/player-ctrl.sh play-pause
+click-left = playerctl play-pause
+click-right = playerctl play-pause
+click-middle = playerctl play-pause
 
 format = <label>
 
@@ -324,30 +332,30 @@ bar-volume-empty-foreground = ${colors.foreground-alt}
 [module/alsa]
 type = internal/alsa
 
-format-volume = <label-volume> <bar-volume>
-label-volume = VOL
+format-volume = <label-volume> 
+label-volume = VOL %percentage%%
 label-volume-foreground = ${root.foreground}
 
 format-muted-prefix = " "
 format-muted-foreground = ${colors.foreground-alt}
 label-muted = sound muted
 
-bar-volume-width = 12
-bar-volume-foreground-0 = #55aa55
-bar-volume-foreground-1 = #55aa55
-bar-volume-foreground-2 = #55aa55
-bar-volume-foreground-3 = #55aa55
-bar-volume-foreground-4 = #55aa55
-bar-volume-foreground-5 = #f5a70a
-bar-volume-foreground-6 = #ff5555
-bar-volume-gradient = false
-bar-volume-indicator = |
-bar-volume-indicator-font = 2
-bar-volume-fill = ─
-bar-volume-fill-font = 2
-bar-volume-empty = ─
-bar-volume-empty-font = 2
-bar-volume-empty-foreground = ${colors.foreground-alt}
+; bar-volume-width = 12
+; bar-volume-foreground-0 = #55aa55
+; bar-volume-foreground-1 = #55aa55
+; bar-volume-foreground-2 = #55aa55
+; bar-volume-foreground-3 = #55aa55
+; bar-volume-foreground-4 = #55aa55
+; bar-volume-foreground-5 = #f5a70a
+; bar-volume-foreground-6 = #ff5555
+; bar-volume-gradient = false
+; bar-volume-indicator = |
+; bar-volume-indicator-font = 2
+; bar-volume-fill = ─
+; bar-volume-fill-font = 2
+; bar-volume-empty = ─
+; bar-volume-empty-font = 2
+; bar-volume-empty-foreground = ${colors.foreground-alt}
 
 [module/battery]
 type = internal/battery
