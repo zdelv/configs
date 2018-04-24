@@ -242,7 +242,7 @@ label = %percentage:2%%
 
 [module/gpu]
 type = custom/script
-exec = gpustat | grep -E -o ".{0,2}%" | tr -d " %"
+exec = gpustat | grep -E -o ".{0,3}%" | tr -d " %"
 format-suffix = "%"
 interval = 2
 format-underline = #54aaca
