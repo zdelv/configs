@@ -57,6 +57,9 @@ Plugin 'junegunn/goyo.vim'
 " vim-workspace
 Plugin 'thaerkh/vim-workspace'
 
+" NCM
+Plugin 'roxma/nvim-completion-manager'
+
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -155,6 +158,9 @@ imap <Left> <Nop>
 imap <Right> <Nop>
 imap <PageUp> <Nop>
 imap <PageDown> <Nop>
+
+" Escape and One-shot
+imap jl <C-o>
 imap jk <Esc>
 
 " Tab settings
@@ -244,6 +250,6 @@ let g:ctrlspace_unicode_font = 0
 " ALE Settings
 " CPP and SH
 let g:ale_fixers = {
-\   'cpp' : ['remove_trailing_lines','trim_whitespace','clang-format'],
+\   'cpp' : ['remove_trailing_lines','trim_whitespace'],
 \   'sh'  : ['remove_trailing_lines','trim_whitespace','shfmt'],
 \}
