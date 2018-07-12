@@ -42,13 +42,13 @@ padding-right = 2
 module-margin-left = 1
 module-margin-right = 2
 
-font-0 = boxxy
+font-0 = terminus12
 font-1 = unifont:fontformat=truetype:size=8:antialias=false;0
 font-2 = siji:pixelsize=10;1
 
 modules-left = i3 xwindow
 modules-center = music 
-modules-right = vpn alsa memory gpu cpu temperature date 
+modules-right = vpn battery alsa memory cpu temperature date 
 
 ;tray-position = center
 tray-padding = 2
@@ -72,15 +72,15 @@ cursor-scroll = ns-resize
 
 [module/vpn]
 type = custom/script
-exec = /home/zdelv/etc/scripts/vpnstat.sh
-click-middle = ovpn
-click-left = ovpn
-click-right = ovpn
+exec = /home/zdelv/etc/polybar/vpnstat.sh
+click-middle = /home/zdelv/etc/polybar/vpn.sh
+click-left = /home/zdelv/etc/polybar/vpn.sh
+click-right = /home/zdelv/etc/polybar/vpn.sh
 
 
 [module/music]
 type = custom/script
-exec = /home/zdelv/etc/scripts/player-mpris-tail.py
+exec = /home/zdelv/etc/polybar/spotify_status.py
 tail = true
 click-left = playerctl play-pause
 click-right = playerctl play-pause
@@ -90,7 +90,6 @@ format = <label>
 
 label = %output%
 
-; [module/music]
 ; [module/music]
 ; type=custom/script
 ; exec=echo $(playerctl metadata artist) - $(playerctl metadata title)
@@ -240,12 +239,12 @@ interval = 2
 format-underline = #f90000
 label = %percentage:2%%
 
-[module/gpu]
-type = custom/script
-exec = gpustat | grep -E -o ".{0,3}%" | tr -d " %"
-format-suffix = "%"
-interval = 2
-format-underline = #54aaca
+; [module/gpu]
+; type = custom/script
+; exec = gpustat | grep -E -o ".{0,3}%" | tr -d " %"
+; format-suffix = "%"
+; interval = 2
+; format-underline = #54aaca
 
 [module/memory]
 type = internal/memory
@@ -298,7 +297,7 @@ type = internal/date
 interval = 5
 
 date =
-date-alt = " %Y-%m-%d"
+date-alt = "%Y-%m-%d"
 
 time = %I:%M %p
 time-alt = %H:%M:%S
@@ -307,7 +306,7 @@ format-prefix =
 format-prefix-foreground = ${colors.foreground-alt}
 format-underline = #0a6cf5
 
-label = %{F#99}%date%%{F-}   %{F#fff}%time%%{F-}
+label = %{F#99}%date%%{F-}%{F#fff}%time%%{F-}
 
 [module/pulseaudio]
 type = internal/pulseaudio
@@ -337,11 +336,12 @@ bar-volume-empty-font = 2
 bar-volume-empty-foreground = ${colors.foreground-alt}
 
 [module/alsa]
-type = internal/alsa
+type = internal/volume
 
 format-volume = <label-volume> 
 label-volume = VOL %percentage%%
 label-volume-foreground = ${root.foreground}
+label-volume-underline= #aa11FF
 
 format-muted-prefix = " "
 format-muted-foreground = ${colors.foreground-alt}
@@ -366,7 +366,7 @@ label-muted = sound muted
 
 [module/battery]
 type = internal/battery
-battery = BAT0
+battery = BAT1
 adapter = ADP1
 full-at = 98
 
@@ -394,7 +394,7 @@ animation-charging-framerate = 750
 [module/temperature]
 type = internal/temperature
 thermal-zone = 0
-warn-temperature = 60
+warn-temperature = 70
 
 format = <ramp> <label>
 format-underline = #f50a4d
@@ -451,3 +451,4 @@ margin-top = 5
 margin-bottom = 5
 
 ; vim:ft=dosini
+
