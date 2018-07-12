@@ -19,6 +19,9 @@ Plugin 'tpope/vim-fugitive'
 Plugin 'flazz/vim-colorschemes'
 Plugin 'drewtempelmeyer/palenight.vim'
 Plugin 'morhetz/gruvbox'
+Plugin 'guns/xterm-color-table.vim'
+Plugin 'dylanaraps/wal.vim'
+Plugin 'chrisbra/Colorizer'
 
 " NERDTree
 Plugin 'scrooloose/nerdtree'
@@ -42,14 +45,14 @@ Plugin 'octol/vim-cpp-enhanced-highlight'
 " Denite.vim
 Plugin 'Shougo/denite.nvim'
 
-" CtrlSpace
-Plugin 'vim-ctrlspace/vim-ctrlspace'
-
 " Commentary.vim
 Plugin 'tpope/vim-commentary'
 
 " ALE (Linting)
 Plugin 'w0rp/ale'
+
+" Gutentags
+Plugin 'ludovicchabant/vim-gutentags'
 
 " Goyo
 Plugin 'junegunn/goyo.vim'
@@ -59,6 +62,12 @@ Plugin 'thaerkh/vim-workspace'
 
 " NCM
 Plugin 'roxma/nvim-completion-manager'
+
+" vimtex
+Plugin 'lervag/vimtex'
+
+" CSV
+Plugin 'chrisbra/csv.vim'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -84,7 +93,6 @@ filetype plugin indent on    " required
 
 
 " 4 Space indenting
-filetype plugin indent on
 " show existing tab with 4 spaces width set tabstop=4 " when indenting with '>', use 4 spaces width
 set shiftwidth=4
 " " On pressing tab, insert 4 spaces
@@ -159,6 +167,10 @@ imap <Right> <Nop>
 imap <PageUp> <Nop>
 imap <PageDown> <Nop>
 
+" Map J and K to move by display lines
+map j gj
+map k gk
+
 " Escape and One-shot
 imap jl <C-o>
 imap jk <Esc>
@@ -171,6 +183,7 @@ nnoremap <C-t> gT
 syntax enable
 set background=dark
 colorscheme yosemite
+set t_Co=256
 
 " denite
 
@@ -228,24 +241,12 @@ if (has("nvim"))
  let $NVIM_TUI_ENABLE_TRUE_COLOR=1
 endif
 
-if (has("termguicolors"))
-	set termguicolors
-endif
+" if (has("termguicolors"))
+" 	set termguicolors
+" endif
 
-" CtrlSpace settings
-set nocompatible
-set hidden
-
-map <C-Space> :CtrlSpace<CR>
-
-let g:CtrlSpaceUnicode = 0
-let g:ctrlspace_unicode_font = 0
-
-"let g:CtrlSpaceSymbols = {"CS": "#", "All": "ALL"} 
-
-" vim-workspace
-
-
+" This makes substitute replace while typing
+set inccommand=nosplit
 
 " ALE Settings
 " CPP and SH
