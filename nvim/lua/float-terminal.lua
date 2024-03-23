@@ -48,6 +48,11 @@ local function open_terminal()
     )
     vim.cmd(cmd)
 
+    -- Set keymaps to close the terminal
+    -- Only set the keymaps in the terminal buffer to avoid conflicts with other buffers
+    opts = { noremap = true, silent = true }
+    api.nvim_buf_set_keymap(buf, 't', '<esc>', '<C-\\><C-n><cmd>FloatTerminalToggle<cr>', opts)
+
     -- Open the terminal in the floating window's buffer
     if not terminal_open then
         vim.fn.termopen(vim.o.shell, {buffer = buf})
@@ -100,7 +105,6 @@ api.nvim_create_user_command('FloatTerminalDelete', delete_terminal, {})
 local opts = { noremap = true, silent = true }
 api.nvim_set_keymap('n', '<leader><leader>t', '<cmd>FloatTerminalToggle<cr>', opts)
 api.nvim_set_keymap('n', '<leader><leader>d', '<cmd>FloatTerminalDelete<cr>', opts)
-api.nvim_set_keymap('t', '<esc>', '<C-\\><C-n><cmd>FloatTerminalToggle<cr>', opts)
 
 -- Export the module
 return {
