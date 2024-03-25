@@ -54,6 +54,11 @@ Plug 'github/copilot.vim'
 call plug#end()
 
 "
+" Custom Lua Plugins
+"
+lua require('float-terminal')
+
+"
 " Colorschemes
 "
 set background=dark
