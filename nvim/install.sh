@@ -36,6 +36,11 @@ function print_version() {
 	echo "Version: $VERSION"
 }
 
+if [ $# -eq 0 ]; then
+	print_help
+	exit 0
+fi
+
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
 	key="$1"
