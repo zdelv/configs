@@ -53,10 +53,6 @@ Plug 'github/copilot.vim'
 
 call plug#end()
 
-"
-" Custom Lua Plugins
-"
-lua require('float-terminal')
 
 "
 " Colorschemes
@@ -198,3 +194,8 @@ imap <silent> <C-j> <Plug>(copilot-next)
 imap <silent> <C-k> <Plug>(copilot-previous)
 let g:copilot_no_tab_map = v:true
 let g:copilot_workspace_folders = [getcwd()]
+
+"
+" Custom Lua Plugins
+"
+lua require('float-terminal')
