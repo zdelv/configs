@@ -168,19 +168,16 @@ if has('nvim')
 	tnoremap <C-w>h <C-\><C-N><C-w>h
 endif
 
-" Open a terminal across the bottom with a split vertical pane
 if has('nvim')
+	" Open a terminal across the bottom with a split vertical pane
 	nmap <silent> <leader>ttn <C-w>n<C-w>v<C-w>j:term<CR>:res<Space>-30<CR><C-w>k
-else
-	nmap <silent> <leader>ttn :term<CR><C-w>R<C-w>:res<Space>-30<CR><C-w>k<C-w>v
-endif
-
-" Open a terminal on the right with an empty window on the left
-if has('nvim')
+	" Open a terminal on the right with an empty window on the left
 	nmap <silent> <leader>tts <C-w>v<C-w>l:term<CR><C-w>h
 else
+	nmap <silent> <leader>ttn :term<CR><C-w>R<C-w>:res<Space>-30<CR><C-w>k<C-w>v
 	nmap <silent> <leader>tts :term<CR><C-w>H<C-w>R<C-w>h
 endif
+
 
 " Unbind useless S-k
 map <S-k> <Nop>
