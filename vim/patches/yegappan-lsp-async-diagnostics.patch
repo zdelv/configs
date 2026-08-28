@@ -1,0 +1,138 @@
+diff --git a/autoload/lsp/lspserver.vim b/autoload/lsp/lspserver.vim
+index 77c8d96..4105622 100644
+--- a/autoload/lsp/lspserver.vim
++++ b/autoload/lsp/lspserver.vim
+@@ -474,7 +474,8 @@ def Rpc(lspserver: dict<any>, method: string, params: any, opts: dict<any> = {})
+ enddef
+ 
+ # LSP server asynchronous RPC callback
+-def AsyncRpcCb(lspserver: dict<any>, method: string, RpcCb: func, chan: channel, reply: dict<any>)
++def AsyncRpcCb(lspserver: dict<any>, method: string, RpcCb: func,
++    opts: dict<any>, chan: channel, reply: dict<any>)
+   if lspserver.debug
+     lspserver.traceLog($'Got response {reply->json_encode()}')
+   endif
+@@ -486,7 +487,9 @@ def AsyncRpcCb(lspserver: dict<any>, method: string, RpcCb: func, chan: channel,
+     if reply->has_key('error')
+       # Capture error details
+       error = reply.error
+-      ProcessLspServerError(method, error)
++      if opts->get('handleError', true)
++        ProcessLspServerError(method, error)
++      endif
+     elseif !reply->has_key('result')
+       # No result and no error is itself an error
+       error = {
+@@ -529,7 +532,8 @@ enddef
+ # Send an async RPC request message to the LSP server with a callback function.
+ # Returns the LSP message id.  This id can be used to cancel the RPC request
+ # (if needed).  Returns -1 on error.
+-def AsyncRpc(lspserver: dict<any>, method: string, params: any, Cbfunc: func): number
++def AsyncRpc(lspserver: dict<any>, method: string, params: any, Cbfunc: func,
++    opts: dict<any> = {}): number
+   var req = {
+     method: method,
+     params: params
+@@ -542,7 +546,7 @@ def AsyncRpc(lspserver: dict<any>, method: string, params: any, Cbfunc: func): n
+   endif
+ 
+   # Do the asynchronous RPC call
+-  var Fn = function('AsyncRpcCb', [lspserver, method, Cbfunc])
++  var Fn = function('AsyncRpcCb', [lspserver, method, Cbfunc, opts])
+ 
+   var reply: dict<any>
+   if get(g:, 'LSPTest')
+@@ -779,37 +783,12 @@ def FlushQueuedDiagnosticsPull(lspserver: dict<any>, _timerid: number)
+   endfor
+ enddef
+ 
+-# Pull diagnostics for a document.
+-# Request: "textDocument/diagnostic"
+-# Param: DocumentDiagnosticParams
+-def PullDiagnostics(lspserver: dict<any>, bnr: number)
+-  if !lspserver.isDiagnosticsProvider
+-    util.ErrMsg('LSP server does not support pull diagnostics')
+-    return
+-  endif
+-
+-  # Send any pending changes before asking for diagnostics.
+-  bnr->listener_flush()
+-
+-  var uri = util.LspBufnrToUri(bnr)
+-  var params: dict<any> = {
+-    textDocument: {
+-      uri: uri
+-    }
+-  }
+-
+-  var prevResultId = lspserver.diagnosticResultIds->get(bnr, '')
+-  if prevResultId != ''
+-    params.previousResultId = prevResultId
+-  endif
+-
+-  var reply = lspserver.rpc('textDocument/diagnostic', params,
+-                            {handleError: false})
+-
++# Process the reply to an asynchronous pull-diagnostics request.
++def PullDiagnosticsReply(lspserver: dict<any>, bnr: number, uri: string,
++    report: any, responseError: dict<any>)
+   # If the language server cancels the pull diagnostic request and asks for a
+   # retrigger, then send the pull diagnostic request again.
+-  if reply->has_key('error')
+-    var responseError: dict<any> = reply.error
++  if !responseError->empty()
+     var errorData = responseError->get('data', {})
+     if responseError.code == LSP_ERROR_SERVER_CANCELLED
+         && errorData->type() == v:t_dict
+@@ -822,11 +801,10 @@ def PullDiagnostics(lspserver: dict<any>, bnr: number)
+   endif
+ 
+   # Result: DocumentDiagnosticReport | null
+-  if reply->empty() || reply.result == v:null || reply.result->empty()
++  if report == v:null || report->type() != v:t_dict || report->empty()
+     return
+   endif
+ 
+-  var report: dict<any> = reply.result
+   var reportKind = report->get('kind', '')
+ 
+   if reportKind == 'full'
+@@ -848,6 +826,38 @@ def PullDiagnostics(lspserver: dict<any>, bnr: number)
+   endif
+ enddef
+ 
++# Pull diagnostics for a document.
++# Request: "textDocument/diagnostic"
++# Param: DocumentDiagnosticParams
++def PullDiagnostics(lspserver: dict<any>, bnr: number)
++  if !lspserver.isDiagnosticsProvider
++    util.ErrMsg('LSP server does not support pull diagnostics')
++    return
++  endif
++
++  # Send any pending changes before asking for diagnostics.
++  bnr->listener_flush()
++
++  var uri = util.LspBufnrToUri(bnr)
++  var params: dict<any> = {
++    textDocument: {
++      uri: uri
++    }
++  }
++
++  var prevResultId = lspserver.diagnosticResultIds->get(bnr, '')
++  if prevResultId != ''
++    params.previousResultId = prevResultId
++  endif
++
++  # A diagnostic response can take seconds while a server indexes a project.
++  # Never block Vim's UI waiting for it.
++  lspserver.rpc_a('textDocument/diagnostic', params,
++    (_, report, responseError) =>
++      PullDiagnosticsReply(lspserver, bnr, uri, report, responseError),
++    {handleError: false})
++enddef
++
+ # Send a file/document change notification to the language server.
+ # Params: DidChangeTextDocumentParams
+ def TextdocDidChange(lspserver: dict<any>, bnr: number): void

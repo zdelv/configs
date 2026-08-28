@@ -1,0 +1,210 @@
+" Vim 9 configuration translated from ~/.config/nvim.
+" Installed by this repository into ~/.config/vim.
+
+if v:version < 901
+  echoerr 'This configuration requires Vim 9.1 or newer.'
+  finish
+endif
+
+let g:vim_config_root = fnamemodify(resolve(expand('<sfile>:p')), ':h')
+execute 'set runtimepath^=' .. fnameescape(g:vim_config_root)
+execute 'set packpath^=' .. fnameescape(g:vim_config_root)
+
+let mapleader = ','
+let maplocalleader = ','
+
+set nocompatible
+set number
+set mouse=a
+set noshowmode
+set clipboard=unnamedplus
+set breakindent
+set undofile
+set ignorecase
+set smartcase
+set hlsearch
+set signcolumn=yes
+set updatetime=250
+set timeoutlen=300
+set splitright
+set splitbelow
+set list
+set listchars=tab:»\ ,trail:·,nbsp:␣
+set incsearch
+set cursorline
+set scrolloff=10
+set confirm
+set termguicolors
+set completeopt=menu,menuone,noinsert
+set hidden
+
+" Terminal Homebrew Vim on macOS has no GUI/X11 clipboard backend. Register
+" the native pasteboard tools with Vim 9's clipboard-provider interface.
+if has('mac') && executable('/usr/bin/pbcopy') && executable('/usr/bin/pbpaste')
+  let v:clipproviders['pbcopy'] = {
+        \ 'available': {-> v:true},
+        \ 'copy': {
+        \   '+': function('config#clipboard_copy'),
+        \   '*': function('config#clipboard_copy')
+        \ },
+        \ 'paste': {
+        \   '+': function('config#clipboard_paste'),
+        \   '*': function('config#clipboard_paste')
+        \ }
+        \ }
+  set clipmethod^=pbcopy
+endif
+
+" Keep persistent state out of the repository and create private directories.
+let s:state_home = empty($XDG_STATE_HOME) ? expand('~/.local/state') : $XDG_STATE_HOME
+let s:vim_state = s:state_home .. '/vim'
+call mkdir(s:vim_state .. '/undo', 'p', 0700)
+call mkdir(s:vim_state .. '/backup', 'p', 0700)
+call mkdir(s:vim_state .. '/swap', 'p', 0700)
+execute 'set undodir=' .. fnameescape(s:vim_state .. '/undo//')
+execute 'set backupdir=' .. fnameescape(s:vim_state .. '/backup//')
+execute 'set directory=' .. fnameescape(s:vim_state .. '/swap//')
+
+filetype plugin indent on
+syntax enable
+silent! colorscheme catppuccin
+
+" Catppuccin Mocha's ANSI palette for programs running inside :terminal.
+" Without this Vim uses its legacy, high-saturation terminal defaults.
+let g:terminal_ansi_colors = [
+      \ '#45475a', '#f38ba8', '#a6e3a1', '#f9e2af',
+      \ '#89b4fa', '#f5c2e7', '#94e2d5', '#bac2de',
+      \ '#585b70', '#f38ba8', '#a6e3a1', '#f9e2af',
+      \ '#89b4fa', '#f5c2e7', '#94e2d5', '#a6adc8'
+      \ ]
+highlight Terminal guifg=#cdd6f4 guibg=#1e1e2e
+
+" Native status line, replacing mini.statusline.
+set laststatus=2
+set statusline=%<%f\ %h%m%r%=%{&filetype}\ %2l:%-2v\ %p%%
+
+" Plugin settings must be defined before Vim loads packages from pack/*/start.
+let g:gitgutter_sign_added = '+'
+let g:gitgutter_sign_modified = '~'
+let g:gitgutter_sign_removed = '_'
+let g:gitgutter_sign_removed_first_line = '‾'
+let g:gitgutter_sign_modified_removed = '~'
+let g:gitgutter_map_keys = 0
+let g:closetag_filenames = '*.html,*.xhtml,*.phtml,*.xml,*.jsx,*.tsx,*.vue,*.heex,*.eex'
+let g:which_key_map = {
+      \ 'c': {'name': '+code'},
+      \ 'd': {'name': '+document'},
+      \ 'h': {'name': '+git-hunk'},
+      \ 'r': {'name': '+rename'},
+      \ 's': {'name': '+search'},
+      \ 't': {'name': '+test/toggle'},
+      \ 'w': {'name': '+workspace'}
+      \ }
+
+" vim-test continues to use the same commands as the Neovim configuration.
+let test#strategy = 'dispatch'
+
+" yegappan/lsp is configured when its start-package emits LspSetup.
+augroup config_lsp
+  autocmd!
+  autocmd User LspSetup call config#lsp_setup()
+  autocmd User LspAttached call config#lsp_mappings()
+augroup END
+
+augroup config_which_key
+  autocmd!
+  autocmd User vim-which-key call which_key#register(',', 'g:which_key_map')
+augroup END
+
+" Basic mappings.
+nnoremap <silent> <Esc> <Cmd>nohlsearch<CR>
+inoremap jk <Esc>
+tnoremap <Esc><Esc> <C-W>N
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+tnoremap <C-w><C-h> <C-w>N<C-w>h
+tnoremap <C-w><C-j> <C-w>N<C-w>j
+tnoremap <C-w><C-k> <C-w>N<C-w>k
+tnoremap <C-w><C-l> <C-w>N<C-w>l
+nnoremap <silent> <leader> <Cmd>WhichKey ','<CR>
+xnoremap <silent> <leader> <Cmd>WhichKeyVisual ','<CR>
+
+" Match Neovim: :term replaces the current window instead of opening a split.
+cnoreabbrev <expr> term config#term_abbrev()
+command! -nargs=* TermSplit belowright terminal <args>
+command! -nargs=* TermVSplit vertical terminal <args>
+
+" Scope replaces Telescope while retaining the original search key layout.
+nnoremap <silent> <leader>sh <Cmd>Scope Help<CR>
+nnoremap <silent> <leader>sk <Cmd>Scope Keymap<CR>
+nnoremap <silent> <leader>sf <Cmd>Scope File<CR>
+nnoremap <silent> <leader>ss <Cmd>Scope Command<CR>
+nnoremap <silent> <leader>sw <Cmd>call config#grep_word()<CR>
+nnoremap <silent> <leader>sg <Cmd>Scope Grep<CR>
+nnoremap <silent> <leader>sd <Cmd>LspDiag show<Bar>lopen<CR>
+nnoremap <silent> <leader>sr <Cmd>Scope MRU<CR>
+nnoremap <silent> <leader>s. <Cmd>Scope MRU<CR>
+nnoremap <silent> <leader><leader> <Cmd>Scope Buffer<CR>
+nnoremap <silent> <leader>/ <Cmd>Scope BufSearch<CR>
+nnoremap <silent> <leader>s/ <Cmd>Scope Grep<CR>
+nnoremap <silent> <leader>sn <Cmd>call config#files(g:vim_config_root)<CR>
+
+" Diagnostic-list mapping is global; language actions are added on LspAttached.
+nnoremap <silent> <leader>q <Cmd>LspDiag show<Bar>lopen<CR>
+
+" Formatting and utility commands.
+command! -range=% Format call config#format(<line1>, <line2>)
+command! FormatJson call config#format_json()
+nnoremap <silent> <leader>f <Cmd>Format<CR>
+xnoremap <silent> <leader>f :<C-U>'<,'>Format<CR>
+
+" Fugitive aliases from the Neovim config.
+command! Gpf Git push -f
+command! Gp Git push
+command! Gl Git log
+
+" Gitsigns-equivalent mappings, powered by vim-gitgutter.
+nnoremap <silent> ]c <Plug>(GitGutterNextHunk)
+nnoremap <silent> [c <Plug>(GitGutterPrevHunk)
+nnoremap <silent> <leader>hs <Plug>(GitGutterStageHunk)
+xnoremap <silent> <leader>hs <Plug>(GitGutterStageHunk)
+nnoremap <silent> <leader>hr <Plug>(GitGutterUndoHunk)
+xnoremap <silent> <leader>hr <Plug>(GitGutterUndoHunk)
+nnoremap <silent> <leader>hp <Plug>(GitGutterPreviewHunk)
+nnoremap <silent> <leader>hb <Cmd>Git blame<CR>
+nnoremap <silent> <leader>hd <Cmd>Gdiffsplit<CR>
+nnoremap <silent> <leader>hD <Cmd>Gdiffsplit HEAD<CR>
+nnoremap <silent> <leader>tb <Cmd>GitGutterLineHighlightsToggle<CR>
+
+" Test shortcuts use vim-test.
+nnoremap <silent> <leader>tn <Cmd>TestNearest<CR>
+nnoremap <silent> <leader>tf <Cmd>TestFile<CR>
+nnoremap <silent> <leader>ts <Cmd>TestSuite<CR>
+nnoremap <silent> <leader>tl <Cmd>TestLast<CR>
+nnoremap <silent> <leader>tv <Cmd>TestVisit<CR>
+
+" Typst preview replacement: compile once, open the PDF, then watch it.
+command! TypstPreview call config#typst_preview()
+command! TypstPreviewStop call config#typst_preview_stop()
+
+augroup config_behavior
+  autocmd!
+  autocmd BufReadPost,BufNewFile *.h setfiletype c
+  autocmd TerminalOpen,BufWinEnter * call config#window_numbers()
+  autocmd TextYankPost * call config#highlight_yank()
+  autocmd BufWritePre *.c,*.h call config#format_on_save()
+  autocmd VimLeavePre * call config#typst_preview_stop()
+augroup END
+
+" A concise replacement for todo-comments.nvim without Treesitter.
+augroup config_todo_highlight
+  autocmd!
+  autocmd Syntax * call config#todo_highlight()
+augroup END
+
+" Warn once when the repository-local packages have not been installed.
+if empty(glob(g:vim_config_root .. '/pack/vendor/start/*'))
+  autocmd VimEnter * echohl WarningMsg | echom 'Vim plugins are not installed; run ./install-plugins' | echohl None
+endif

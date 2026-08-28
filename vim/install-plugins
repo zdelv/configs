@@ -1,0 +1,153 @@
+#!/bin/sh
+set -eu
+
+config_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+xdg_config_dir=${XDG_CONFIG_HOME:-"$HOME/.config"}
+install_dir="$xdg_config_dir/vim"
+package_dir="$install_dir/pack/vendor/start"
+patch_dir="$config_dir/patches"
+lock_file="$config_dir/.plugin-lock"
+mkdir -p "$install_dir/autoload" "$package_dir"
+
+install -m 0644 "$config_dir/vimrc" "$install_dir/vimrc"
+install -m 0644 "$config_dir/autoload/config.vim" "$install_dir/autoload/config.vim"
+
+vimrc_link="$HOME/.vimrc"
+if [ ! -e "$vimrc_link" ] && [ ! -L "$vimrc_link" ]; then
+  ln -s "$install_dir/vimrc" "$vimrc_link"
+elif [ -L "$vimrc_link" ]; then
+  current_target=$(readlink "$vimrc_link")
+  if [ "$current_target" = "$config_dir/vimrc" ] || [ "$current_target" = "$install_dir/vimrc" ]; then
+    ln -sfn "$install_dir/vimrc" "$vimrc_link"
+  else
+    printf 'Refusing to replace %s -> %s\n' "$vimrc_link" "$current_target" >&2
+    exit 1
+  fi
+else
+  printf 'Refusing to replace existing %s; link it to %s manually\n' "$vimrc_link" "$install_dir/vimrc" >&2
+  exit 1
+fi
+
+if [ ! -e "$lock_file" ]; then
+  printf '# GitHub repository commit\n' >"$lock_file"
+fi
+
+remove_patch() {
+  destination=$1
+  patch_file=$2
+
+  if [ -d "$destination/.git" ] && git -C "$destination" apply --reverse --check "$patch_file" >/dev/null 2>&1; then
+    printf 'Temporarily removing local patch from %s\n' "${destination##*/}"
+    git -C "$destination" apply --reverse "$patch_file"
+  fi
+}
+
+apply_patch() {
+  destination=$1
+  patch_file=$2
+
+  if git -C "$destination" apply --check "$patch_file" >/dev/null 2>&1; then
+    printf 'Applying local patch to %s\n' "${destination##*/}"
+    git -C "$destination" apply "$patch_file"
+  elif git -C "$destination" apply --reverse --check "$patch_file" >/dev/null 2>&1; then
+    printf 'Local patch is already present in %s\n' "${destination##*/}"
+  else
+    printf 'Cannot apply %s; the plugin changed incompatibly\n' "${patch_file##*/}" >&2
+    exit 1
+  fi
+}
+
+locked_revision() {
+  awk -v repository="$1" '$1 == repository { print $2; exit }' "$lock_file"
+}
+
+record_revision() {
+  repository=$1
+  revision=$2
+  printf '%-44s %s\n' "$repository" "$revision" >>"$lock_file"
+  printf 'Locked %s at %s\n' "$repository" "$revision"
+}
+
+checkout_revision() {
+  destination=$1
+  repository=$2
+  revision=$3
+
+  case "$revision" in
+    '' | *[!0-9a-f]*)
+      printf 'Invalid locked revision for %s: %s\n' "$repository" "$revision" >&2
+      exit 1
+      ;;
+  esac
+  if [ "${#revision}" -ne 40 ]; then
+    printf 'Invalid locked revision for %s: %s\n' "$repository" "$revision" >&2
+    exit 1
+  fi
+
+  if ! git -C "$destination" diff --quiet || ! git -C "$destination" diff --cached --quiet; then
+    printf 'Refusing to replace local changes in %s\n' "$destination" >&2
+    exit 1
+  fi
+
+  if ! git -C "$destination" cat-file -e "$revision^{commit}" 2>/dev/null; then
+    printf 'Fetching locked revision for %s\n' "$repository"
+    git -C "$destination" fetch --depth=1 origin "$revision"
+  fi
+
+  printf 'Using locked %s at %s\n' "$repository" "$revision"
+  git -C "$destination" checkout --quiet --detach "$revision"
+}
+
+install_plugin() {
+  repository=$1
+  name=${repository##*/}
+  name=${name%.git}
+  destination="$package_dir/$name"
+  revision=$(locked_revision "$repository")
+
+  if [ -d "$destination/.git" ]; then
+    if [ -n "$revision" ]; then
+      checkout_revision "$destination" "$repository" "$revision"
+    else
+      printf 'Updating unlocked %s\n' "$name"
+      git -C "$destination" fetch --quiet --depth=1 origin
+      default_ref=$(git -C "$destination" symbolic-ref --quiet --short refs/remotes/origin/HEAD || true)
+      if [ -z "$default_ref" ]; then
+        printf 'Cannot determine the default branch for %s\n' "$repository" >&2
+        exit 1
+      fi
+      git -C "$destination" checkout --quiet --detach "$default_ref"
+      record_revision "$repository" "$(git -C "$destination" rev-parse HEAD)"
+    fi
+  elif [ -e "$destination" ]; then
+    printf 'Cannot install %s: destination exists but is not a git checkout\n' "$name" >&2
+    exit 1
+  else
+    printf 'Installing %s\n' "$name"
+    git clone --quiet --depth=1 "https://github.com/$repository.git" "$destination"
+    if [ -n "$revision" ]; then
+      checkout_revision "$destination" "$repository" "$revision"
+    else
+      record_revision "$repository" "$(git -C "$destination" rev-parse HEAD)"
+    fi
+  fi
+}
+
+remove_patch "$package_dir/lsp" "$patch_dir/yegappan-lsp-async-diagnostics.patch"
+install_plugin yegappan/lsp
+apply_patch "$package_dir/lsp" "$patch_dir/yegappan-lsp-async-diagnostics.patch"
+install_plugin girishji/scope.vim
+install_plugin tpope/vim-fugitive
+install_plugin tpope/vim-surround
+install_plugin tpope/vim-sleuth
+install_plugin tpope/vim-dispatch
+install_plugin vim-test/vim-test
+install_plugin tartansandal/vim-compiler-pytest
+install_plugin airblade/vim-gitgutter
+install_plugin wellle/targets.vim
+install_plugin alvan/vim-closetag
+install_plugin kaarmu/typst.vim
+install_plugin liuchengxu/vim-which-key
+install_plugin markonm/traces.vim
+
+printf '\nInstalled Vim configuration in %s\n' "$install_dir"
