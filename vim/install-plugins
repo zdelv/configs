@@ -136,18 +136,19 @@ install_plugin() {
 remove_patch "$package_dir/lsp" "$patch_dir/yegappan-lsp-async-diagnostics.patch"
 install_plugin yegappan/lsp
 apply_patch "$package_dir/lsp" "$patch_dir/yegappan-lsp-async-diagnostics.patch"
+install_plugin airblade/vim-gitgutter
+install_plugin alvan/vim-closetag
 install_plugin girishji/scope.vim
+install_plugin liuchengxu/vim-which-key
+install_plugin markonm/traces.vim
 install_plugin tpope/vim-fugitive
 install_plugin tpope/vim-surround
 install_plugin tpope/vim-sleuth
 install_plugin tpope/vim-dispatch
 install_plugin vim-test/vim-test
-install_plugin tartansandal/vim-compiler-pytest
-install_plugin airblade/vim-gitgutter
 install_plugin wellle/targets.vim
-install_plugin alvan/vim-closetag
-install_plugin kaarmu/typst.vim
-install_plugin liuchengxu/vim-which-key
-install_plugin markonm/traces.vim
+
+# install_plugin tartansandal/vim-compiler-pytest
+# install_plugin kaarmu/typst.vim
 
 printf '\nInstalled Vim configuration in %s\n' "$install_dir"
